@@ -1,0 +1,26 @@
+.itemsEnv{
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    .itemsNav{
+        display: flex;
+        justify-content: space-between;
+        border: 1px solid;
+    }
+    .item{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid;
+        margin-top: 10px;
+        
+        .clickable{
+            display: flex;
+            align-items: center;
+            width:100%;
+            .itemText{
+                width:100%;
+            }
+        }
+    }
+}
