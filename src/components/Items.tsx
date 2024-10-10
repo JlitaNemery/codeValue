@@ -1,15 +1,19 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setIsAdd } from '../store/addSlice';
 import { setItem, clearById } from '../store/editSlice';
 import { selectProducts, sortByName, sortByDate, removeItem, setAll } from '../store/productsSlice';
+import { useDebounce } from 'use-debounce';
 import defaultProducts from '../defaultProducts';
 import './scss/Items.scss';
 import viteLogo from '/vite.svg';
+import { Product } from '../types/types';
 
 export default function Items() {
     const dispatch = useDispatch();
     const items = useSelector(selectProducts);
+    const [searchVal, setSearchVal] = useState('');
+    const [debouncedFilter] = useDebounce(searchVal, 400);
 
     useEffect(() => {
         const localItemsStr = localStorage.getItem('products');        
@@ -35,11 +39,27 @@ export default function Items() {
         dispatch(removeItem(i));
     }
 
+    const filterDebounce = (item: Product) => {
+        if (debouncedFilter !== '') {
+            const debouncedFilterLower = debouncedFilter.toLowerCase();
+            const descriptionLower = item.description.toLowerCase();
+            const nameLower = item.name.toLowerCase();
+            if (descriptionLower.includes(debouncedFilterLower) || nameLower.includes(debouncedFilterLower)) {
+                return true;
+            }
+            return false;
+        }
+        return true;
+    };
+
     return (
         <div className="itemsEnv">
             <div className="itemsNav">
                 <div className="add">
                     <button onClick={() => dispatch(setIsAdd())}>+ add</button>
+                </div>
+                <div className="search">
+                    <input type="text" onChange={(e) => setSearchVal(e.target.value)}/>
                 </div>
                 <div className="sorter">
                     <label className="title">Sort by
@@ -53,7 +73,7 @@ export default function Items() {
                 </div>
                 
             </div>
-            {items.map((item, i) => (
+            {items.filter((item) => filterDebounce(item)).map((item, i) => (
                 <div className="item" key={i}>
                     <div className="clickable"  onClick={() => dispatch(setItem(item))}>
                         <div className="img">
