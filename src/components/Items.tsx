@@ -2,7 +2,8 @@ import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { setIsAdd } from '../store/addSlice';
 import { setItem, clearById } from '../store/editSlice';
-import { selectProducts, sortByName, sortByDate, removeItem } from '../store/productsSlice';
+import { selectProducts, sortByName, sortByDate, removeItem, setAll } from '../store/productsSlice';
+import defaultProducts from '../defaultProducts';
 import './scss/Items.scss';
 import viteLogo from '/vite.svg';
 
@@ -11,6 +12,13 @@ export default function Items() {
     const items = useSelector(selectProducts);
 
     useEffect(() => {
+        const localItemsStr = localStorage.getItem('products');        
+        if (localItemsStr !== null && localItemsStr !== 'undefined') {
+            const localItems = JSON.parse(localItemsStr);
+            dispatch(setAll(localItems));
+        } else {
+            dispatch(setAll(defaultProducts));
+        }
         dispatch(sortByName());
     }, []);
 
@@ -33,9 +41,6 @@ export default function Items() {
                 <div className="add">
                     <button onClick={() => dispatch(setIsAdd())}>+ add</button>
                 </div>
-                {/* <div className="search">
-                    <input type="text" />
-                </div> */}
                 <div className="sorter">
                     <label className="title">Sort by
                         <select

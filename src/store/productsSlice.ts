@@ -8,22 +8,7 @@ interface ProductsState {
 };
 
 const initialState: ProductsState = {
-    value: [
-        {
-            id: 3,
-            name: 'z',
-            description: 'z',
-            price: 40,
-            creationDate: 1
-        },
-        {
-            id: 4,
-            name: 'a',
-            description: 'd',
-            price: 40,
-            creationDate: new Date().getTime()
-        }
-    ]
+    value: []
 };
 
 export const productsSlice = createSlice({
@@ -43,7 +28,7 @@ export const productsSlice = createSlice({
                 return 0;
             });
         },
-        sortByDate: (state) => { 
+        sortByDate: (state) => {
             state.value.sort((a, b) => a.creationDate - b.creationDate);
         },
         removeItem: (state, action: PayloadAction<number>) => {
@@ -55,11 +40,12 @@ export const productsSlice = createSlice({
             } else {
                 state.value = [...state.value.slice(0, idx), ...state.value.slice(idx + 1)];
             }
+            localStorage.setItem('products', JSON.stringify(state.value));
         },
         addItem: (state, action: PayloadAction<Omit<Product, 'id' | 'creationDate'>>) => {
             const ids: number[] = [];
             let rand = 0;
-            for (let i = 0; i < state.value.length; i++){
+            for (let i = 0; i < state.value.length; i++) {
                 ids.push(state.value[i].id);
             }
             while (true) {
@@ -75,20 +61,25 @@ export const productsSlice = createSlice({
                 price: action.payload.price,
                 creationDate: new Date().getTime()
             });
+            localStorage.setItem('products', JSON.stringify(state.value));
         },
-        editItem: (state, action: PayloadAction<Omit <Product, 'creationDate'>>) => {
+        editItem: (state, action: PayloadAction<Omit<Product, 'creationDate'>>) => {
             const prevItem = state.value.find((item) => item.id === action.payload.id);
             if (prevItem) {
                 prevItem.description = action.payload.description;
                 prevItem.name = action.payload.name;
                 prevItem.price = action.payload.price;
+                localStorage.setItem('products', JSON.stringify(state.value));
             }
-            
+        },
+        setAll: (state, action: PayloadAction<Product[]>) => {
+            state.value = action.payload;
+            localStorage.setItem('products', JSON.stringify(state.value));
         }
-    },
-})
+    }
+});
 
-export const { sortByName, sortByDate, removeItem, addItem, editItem } = productsSlice.actions;
+export const { sortByName, sortByDate, removeItem, addItem, editItem, setAll } = productsSlice.actions;
 export const selectProducts = (state: RootState) => state.products.value;
 
 export default productsSlice.reducer;
