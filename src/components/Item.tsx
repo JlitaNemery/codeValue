@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Product } from '../types/types';
 import { setIsAdd} from '../store/addSlice';
 import { editItem, addItem } from '../store/productsSlice';
@@ -12,17 +12,9 @@ interface ItemProps {
 
 export default function Item({ product }: ItemProps) {
     const dispatch = useDispatch();
-    const [formData, setFormData] = useState({ name: '', description: '', price: 1 });
+    const [formData, setFormData] = useState({ name: product?.name || '', description: product?.description || '', price: product?.price || 1 });
     const [formValidation, setFormValidation] = useState({ name: true, description: true, price: true });
     const [canSave, setCanSave] = useState(false);
-
-    useEffect(() => {
-        if (product) {
-            setFormData((prev) => {
-                return { ...prev, name: product.name, description: product.description, price: product.price };
-            })
-        }
-    }, [product]);
 
     const handleChange = (event: React.FormEvent<HTMLInputElement> | React.FormEvent<HTMLTextAreaElement>) => {
         const { name, value } = event.currentTarget;
