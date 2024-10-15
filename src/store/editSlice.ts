@@ -1,37 +1,32 @@
-import { createSlice } from '@reduxjs/toolkit';
-import type { PayloadAction } from '@reduxjs/toolkit';
-import type { RootState } from './store';
-import { Product } from '../types/types';
+import { createSlice } from "@reduxjs/toolkit";
+import type { PayloadAction } from "@reduxjs/toolkit";
+import type { RootState } from "./store";
+import { Product } from "../types/types";
+import { defaultProduct } from "../defaultProducts";
 
 interface editState {
-    value: Product | null
-};
+  value: Product | Omit<Product, "creationDate"> | null;
+}
 
 const initialState: editState = { value: null };
 
 export const editSlice = createSlice({
-    name: 'edit',
-    initialState,
-    reducers: {
-        setItem: (state, action: PayloadAction<Product>) => {
-            const item = action.payload;
-            state.value = {
-                id: item.id,
-                name: item.name,
-                description: item.description,
-                price: item.price,
-                creationDate: item.creationDate
-            };
-        },
-        clearById: (state, action: PayloadAction<number>) => {
-            if (state.value && state.value.id === action.payload) {
-                state.value = null;
-            }
-        }
+  name: "edit",
+  initialState,
+  reducers: {
+    setNewItem: (state) => {
+      state.value = defaultProduct;
     },
+    setItem: (state, action: PayloadAction<Product>) => {
+      state.value = action.payload;
+    },
+    clear: (state) => {
+      state.value = null;
+    },
+  },
 });
 
-export const { setItem, clearById } = editSlice.actions;
+export const { setItem, clear, setNewItem } = editSlice.actions;
 export const selectEdit = (state: RootState) => state.edit.value;
 
 export default editSlice.reducer;
