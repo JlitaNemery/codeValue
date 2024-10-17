@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import store from "../store/store";
-import { setItem, clear, setNewItem } from "../store/editSlice";
 import { selectProducts, removeItem } from "../store/productsSlice";
 import { useDebounce } from "use-debounce";
 import "./scss/Items.scss";
 import viteLogo from "/vite.svg";
 import { Product } from "../types/types";
+
+const ITEMS_PER_PAGE = 5;
 
 export default function Items() {
   const dispatch = useDispatch();
@@ -15,6 +17,7 @@ export default function Items() {
   const [sortBy, setSortBy] = useState("name");
   const [searchVal, setSearchVal] = useState("");
   const [debouncedFilter] = useDebounce(searchVal, 400);
+  const navigate = useNavigate();
 
   store.subscribe(() => {
     localStorage.setItem(
@@ -43,8 +46,10 @@ export default function Items() {
     }
   };
 
-  const deleteItem = (id: number) => {
-    dispatch(clear());
+  const deleteItem = (id: number, numItems: number) => {
+    if (numItems % (ITEMS_PER_PAGE - 1) === 1 && page > 0) {
+      setPage((prev) => prev - 1);
+    }
     dispatch(removeItem(id));
   };
 
@@ -72,7 +77,17 @@ export default function Items() {
     <div className="itemsEnv">
       <div className="itemsNav">
         <div className="add">
-          <button onClick={() => dispatch(setNewItem())}>+ add</button>
+          <button
+            onClick={() =>
+              navigate("/new", {
+                state: {
+                  product: { id: 0, name: "", description: "", price: 1 },
+                },
+              })
+            }
+          >
+            + add
+          </button>
         </div>
         <div className="search">
           <input type="text" onChange={(e) => setSearchVal(e.target.value)} />
@@ -87,22 +102,34 @@ export default function Items() {
           </label>
         </div>
       </div>
-      {renderItems.slice(page * 5, page * 5 + 5).map((item) => (
-        <div className="item" key={item.id}>
-          <div className="clickable" onClick={() => dispatch(setItem(item))}>
-            <div className="img">
-              <img src={viteLogo} className="logo" alt="Vite logo" />
+      {renderItems
+        .slice(
+          page * (ITEMS_PER_PAGE - 1),
+          page * (ITEMS_PER_PAGE - 1) + ITEMS_PER_PAGE - 1
+        )
+        .map((item) => (
+          <div className="item" key={item.id}>
+            <div
+              className="clickable"
+              onClick={() =>
+                navigate(`/:${item.id}`, { state: { product: item } })
+              }
+            >
+              <div className="img">
+                <img src={viteLogo} className="logo" alt="Vite logo" />
+              </div>
+              <div className="itemText">
+                <h4>{`Product ${item.name}`}</h4>
+                <span>{item.description}</span>
+              </div>
             </div>
-            <div className="itemText">
-              <h4>{`Product ${item.name}`}</h4>
-              <span>{item.description}</span>
+            <div className="delete">
+              <button onClick={() => deleteItem(item.id, renderItems.length)}>
+                Delete
+              </button>
             </div>
           </div>
-          <div className="delete">
-            <button onClick={() => deleteItem(item.id)}>Delete</button>
-          </div>
-        </div>
-      ))}
+        ))}
       <div className="paging">
         <button
           onClick={() => setPage(page - 1)}
@@ -112,7 +139,11 @@ export default function Items() {
         </button>
         <button
           onClick={() => setPage(page + 1)}
-          disabled={page + 1 < Math.ceil(renderItems.length / 5) ? false : true}
+          disabled={
+            page + 1 < Math.ceil(renderItems.length / (ITEMS_PER_PAGE - 1))
+              ? false
+              : true
+          }
         >
           next page
         </button>

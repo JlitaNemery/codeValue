@@ -1,19 +1,33 @@
-// import { useState } from 'react'
-import { useSelector } from "react-redux";
-import { selectEdit } from "./store/editSlice";
+import { Route, Routes, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Items from "./components/Items";
 import Item from "./components/Item";
 import "./App.scss";
 
 function App() {
-  const editItem = useSelector(selectEdit);
+  const location = useLocation();
+
+  const RenderRoutes = () => {
+    const product = location?.state?.product;
+    return product ? (
+      <Routes>
+        <Route path="/new" element={<Item product={product} />} />
+        <Route
+          path={`/:id`}
+          element={<Item product={product} key={product.id} />}
+        />
+      </Routes>
+    ) : (
+      <></>
+    );
+  };
+
   return (
     <>
       <Navbar />
       <div className="pageContent">
         <Items />
-        {editItem ? <Item product={editItem} key={editItem.id} /> : <></>}
+        <RenderRoutes />
       </div>
     </>
   );

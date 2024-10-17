@@ -36,7 +36,7 @@ export const productsSlice = createSlice({
       if (idx === 0) {
         state.value = state.value.slice(1);
       } else if (idx === state.value.length - 1) {
-        state.value = state.value.slice(0, 1);
+        state.value = state.value.slice(0, idx);
       } else {
         state.value = [
           ...state.value.slice(0, idx),

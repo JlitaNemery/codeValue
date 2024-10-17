@@ -2,21 +2,21 @@ import { useState } from "react";
 import { Product } from "../types/types";
 import { editItem, addItem } from "../store/productsSlice";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import viteLogo from "/vite.svg";
 import "./scss/Item.scss";
-import { clear } from "../store/editSlice";
 
 interface ItemProps {
-  product: Product | Omit<Product, "creationDate"> | null;
+  product: Product | Omit<Product, "creationDate">;
 }
 
 export default function Item({ product }: ItemProps) {
   const dispatch = useDispatch();
-  console.log(product?.id);
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: product?.name || "",
-    description: product?.description || "",
-    price: product?.price || 1,
+    name: product.name,
+    description: product.description,
+    price: product.price,
   });
   const [formValidation, setFormValidation] = useState({
     name: true,
@@ -67,7 +67,6 @@ export default function Item({ product }: ItemProps) {
 
   const handleSubmit = (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log(product);
     if (product && product.id != 0) {
       dispatch(
         editItem({
@@ -92,7 +91,7 @@ export default function Item({ product }: ItemProps) {
         `Saved new item: \nName: ${formData.name}, \ndescription: ${formData.description}, \nprice: ${formData.price}`
       );
     }
-    dispatch(clear());
+    navigate("/");
   };
 
   return (
